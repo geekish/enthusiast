@@ -209,11 +209,11 @@ if( isset( $_POST['enth_join'] ) && $_POST['enth_join'] == 'yes' ) {
          $query .= '\'' . $values[$field] . '\', ';
       $query .= "1, MD5( '$password' ), '$show_email', 1, NULL )";
 
-      $db_link = mysql_connect( $info['dbserver'], $info['dbuser'],
+      $db_link = mysqli_connect( $info['dbserver'], $info['dbuser'],
          $info['dbpassword'] )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
       mysql_select_db( $info['dbdatabase'], $db_link )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
       $result = mysql_query( $query, $db_link );
 
       // if addition is successful
@@ -305,7 +305,7 @@ if( isset( $_POST['enth_join'] ) && $_POST['enth_join'] == 'yes' ) {
       } else {
          if( mysql_errno() != 1062 ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
 ?>
             <p<?php echo $errorstyle ?>>An error occured while attempting to add you to the pending

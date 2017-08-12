@@ -22,26 +22,26 @@
 
  For more information please view the readme.txt file.
 ******************************************************************************/
-	
+
 /*___________________________________________________________________________*/
 function parse_email( $type, $listing, $email, $password = '' ) {
    require( 'config.php' );
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
@@ -51,32 +51,32 @@ function parse_email( $type, $listing, $email, $password = '' ) {
    // get owner name
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
       '"owner_name"';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $owner_name = $row['value'];
 
    // connect to listing database
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( 'Cannot connect: ' . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( 'Cannot connect: ' . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( 'Cannot connect: ' . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( 'Cannot connect: ' . mysqli_error() );
 
    // get member info
    $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $fan = mysql_fetch_array( $result );
+   $fan = mysqli_fetch_array( $result );
 
    // get template
    $template = '';
@@ -123,8 +123,8 @@ function parse_email( $type, $listing, $email, $password = '' ) {
          $template );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $template;
 }
 
@@ -134,21 +134,21 @@ function get_members( $listing, $status = 'all', $sort = array(),
    $start = 'none', $bydate = 'no' ) {
    require( 'config.php' );
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
@@ -178,10 +178,10 @@ function get_members( $listing, $status = 'all', $sort = array(),
    }
 
    // connect to actual db
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // piece together the query
    $query = "SELECT * FROM `$table`";
@@ -200,19 +200,19 @@ function get_members( $listing, $status = 'all', $sort = array(),
    $query .= $limit_query;
 
    // get results
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $members = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $members[] = $row;
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $members;
 }
 
@@ -222,21 +222,21 @@ function get_members( $listing, $status = 'all', $sort = array(),
 function delete_member( $id, $email ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
@@ -244,23 +244,23 @@ function delete_member( $id, $email ) {
    $dbpassword = $info['dbpassword'];
 
    // connect to actual database
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // delete fan
    $query = "DELETE FROM `$table` WHERE `email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $result;
 }
 
@@ -269,45 +269,45 @@ function delete_member( $id, $email ) {
 function approve_member( $id, $email ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // approve member
    $query = "UPDATE `$table` SET `pending` = 0, `added` = CURDATE() WHERE " .
       "`email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $result;
 }
 
@@ -316,44 +316,44 @@ function approve_member( $id, $email ) {
 function enqueue_member( $id, $email ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // approve member
    $query = "UPDATE `$table` SET `pending` = 1 WHERE `email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $result;
 }
 
@@ -362,45 +362,45 @@ function enqueue_member( $id, $email ) {
 function get_member_info( $listing, $email ) {
    require( 'config.php' );
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get member info
    $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $row;
 }
 
@@ -408,31 +408,31 @@ function get_member_info( $listing, $email ) {
 /*___________________________________________________________________________*/
 function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    foreach( $fields as $field => $value ) {
       $query = '';
@@ -492,10 +492,10 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
       } // end switch
 
       if( $query ) {
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link_list, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -505,10 +505,10 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
    if( $hold != 'no' && $info['holdupdate'] == 1 ) {
       // place on pending!
       $query = "UPDATE `$table` SET `pending` = 1 WHERE `email` = '$email'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link_list, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -516,16 +516,16 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
 
    // update added date
    $query = "UPDATE `$table` SET `added` = CURDATE() WHERE `email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return true;
 }
 
@@ -536,28 +536,28 @@ function search_members( $search, $listing = '', $status = 'all',
    $start = 'none' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
 
    // connect to listing database
-   $db_link_list = mysql_connect( $info['dbserver'], $info['dbuser'],
+   $db_link_list = mysqli_connect( $info['dbserver'], $info['dbuser'],
       $info['dbpassword'] )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $info['dbdatabase'] )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $info['dbdatabase'] )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // create query
    $query = 'SELECT * FROM `' . $info['dbtable'] . '` WHERE MATCH( ' .
@@ -577,20 +577,20 @@ function search_members( $search, $listing = '', $status = 'all',
       $query .= " LIMIT $start, 25";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $members = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $members[] = $row;
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $members;
 }
 
@@ -601,21 +601,21 @@ function search_members( $search, $listing = '', $status = 'all',
 function get_member_sorter( $listing, $level = 1, $top = array() ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get sortby
    $query = "SELECT `sort` FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $sortarray = explode( ',', $row['sort'] );
    foreach( $sortarray as $i => $s ) {
       if( !$s ) continue;
@@ -628,24 +628,24 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get sorters
    $query = "SELECT DISTINCT( `$sort` ) AS `sort` FROM `$table` WHERE " .
@@ -655,19 +655,19 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
       $query .= " AND `$col` $comparison '$val'";
    }
    $query .= ' ORDER BY `sort` ASC';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $sorters = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $sorters[] = $row['sort'];
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $sorters;
 }
 
@@ -676,48 +676,48 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
 function check_member_password( $listing, $email, $attempt ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$table` WHERE `email` = '$email' AND " .
       "`password` = MD5( '$attempt' )";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $passwordvalid = false;
-   if( mysql_num_rows( $result ) > 0 )
+   if( mysqli_num_rows( $result ) > 0 )
       $passwordvalid = true;
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $passwordvalid;
 }
 
@@ -725,31 +725,31 @@ function check_member_password( $listing, $email, $attempt ) {
 function reset_member_password( $listing, $email ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
    $dbuser = $info['dbuser'];
    $dbpassword = $info['dbpassword'];
 
-   $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // create random password
    $password = '';
@@ -762,16 +762,16 @@ function reset_member_password( $listing, $email ) {
    // update record
    $query = "UPDATE `$table` SET `password` = MD5( '$password' ) WHERE " .
       "`email` = '$email'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   mysql_close( $db_link_list );
-   mysql_close( $db_link );
+   mysqli_close( $db_link_list );
+   mysqli_close( $db_link );
    return $password;
 }
 ?>

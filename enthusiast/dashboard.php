@@ -38,12 +38,12 @@ if( !isset( $logged_in ) || !$logged_in ) {
 
 require_once( 'header.php' );
 require( 'config.php' );
+require_once( 'mod_errorlogs.php' );
 require_once( 'mod_categories.php' );
 require_once( 'mod_joined.php' );
 require_once( 'mod_owned.php' );
 require_once( 'mod_affiliates.php' );
 require_once( 'mod_settings.php' );
-require_once( 'mod_errorlogs.php' );
 ?>
 
 <h1>You are managing: <?php echo get_setting( 'collective_title' ) ?></h1>
@@ -152,7 +152,7 @@ foreach( $owned as $id ) {
       if( $header ) {
 ?>
          <h2>Neglected Listings Notification</h2>
-         <p>The following listings have gone on two months without a 
+         <p>The following listings have gone on two months without a
          newly-approved member or a new/updated affiliate!</p>
          <ul>
 <?php
@@ -190,7 +190,7 @@ if( !file_exists($cachefilename) || time() > filectime($cachefilename)+86400) { 
         if( !$success ) {
             throw new Exception('Feed has gone on vacation.');
         }
-        
+
         $i = 1;
         foreach ($doc->getElementsByTagName('item') as $node) {
             if( $i > 3 ) {
@@ -224,7 +224,7 @@ if( !file_exists($cachefilename) || time() > filectime($cachefilename)+86400) { 
             $_12hh = date( 'h', strtotime( $pubdate ) );
             $_24h = date( 'G', strtotime( $pubdate ) );
             $_24hh = date( 'H', strtotime( $pubdate ) );
-            
+
             $posts .= <<<MARKUP
                 <h2>{$title}<br />
                 <small>{$daylong}, {$dth} {$monlong} {$yyyy} &bull; <a href="{$link}">permalink</a></small></h2>

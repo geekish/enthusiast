@@ -31,7 +31,7 @@ function show_step1() {
    Welcome to the Setup section of Enthusiast 3. On this section, you will
    be able to add listings to your collective. It will automatically
    create the database tables for you if needed, and you need only to add
-   the required <code>config.php</code> file in your listing's directory 
+   the required <code>config.php</code> file in your listing's directory
    and insert appropriate PHP snippets in your listing's pages.
    </p>
 
@@ -171,7 +171,7 @@ function show_step1() {
       $options[] = array( 'text' => $optiontext, 'id' => $cat['catid'] );
    }
    usort( $options, 'category_array_compare' );
-   $selected = explode( '|', $info['catid'] );
+   $selected = isset( $info ) ? explode( '|', $info['catid'] ) : array();
    foreach( $options as $o ) {
       echo '<option value="' . $o['id'];
       if( in_array( $o['id'], $catids ) )
@@ -284,8 +284,8 @@ function do_step1() {
             'FULLTEXT( email, name, country, url ) ' .
             ') TYPE=MyISAM;';
 
-         $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-            or die( DATABASE_CONNECT_ERROR . mysql_error() );
+         $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
          if( $db_link_list === false ) {
 ?>
             <p class="error">
@@ -294,8 +294,8 @@ function do_step1() {
 <?php
             return false;
          }
-         $db_selected = mysql_select_db( $dbdatabase )
-            or die( DATABASE_CONNECT_ERROR . mysql_error() );
+         $db_selected = mysqli_select_db( $dbdatabase )
+            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
          if( !$db_selected ) {
 ?>
             <p class="error">
@@ -304,10 +304,10 @@ function do_step1() {
 <?php
             return false;
          }
-         $result = mysql_query( $query, $db_link_list );
+         $result = mysqli_query( $db_link_list, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             echo '<p class="error">Listing database creation failed.</p>';
             die( STANDARD_ERROR );
@@ -315,10 +315,10 @@ function do_step1() {
          mysql_close( $db_link_list );
       }
 
-      $db_link = mysql_connect( $db_server, $db_user, $db_password )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
-      mysql_select_db( $db_database )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
+      $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      mysqli_select_db( $db_link, $db_database )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
       // setup temp database values
       $stat = '0';
@@ -350,10 +350,10 @@ function do_step1() {
          "'$dbdatabase', '$dbtable', '$subject', '$email', '$catid', '$stat', " .
          "'$signup', '$approval', '$update', '$lostpass', '$listtemplate', " .
          "'$affiliatestemplate', '$statstemplate', CURDATE() )";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          echo '<p class="error">Listing database creation failed.</p>';
          die( STANDARD_ERROR );

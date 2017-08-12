@@ -27,21 +27,21 @@
 /*___________________________________________________________________________*/
 function log_error( $page, $text, $kill = true ) {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
    // check if we're monitoring errors!
    $query = "SELECT `value` FROM `$db_settings` WHERE " .
       "`setting` = 'log_errors'";
-   $result = mysql_query( $query )
-      or die( 'Error executing query: ' . mysql_error() );
-   $row = mysql_fetch_array( $result );
+   $result = mysqli_query( $db_link, $query )
+      or die( 'Error executing query: ' . mysqli_error( $db_link ) );
+   $row = mysqli_fetch_array( $result );
    if( $row['value'] == 'yes' ) {
       $text = addslashes( $text );
       $query = "INSERT INTO `$db_errorlog` VALUES( NOW(), '$page', '$text' )";
-      $result = mysql_query( $query )
-         or die( 'Error executing query: ' . mysql_error() );
+      $result = mysqli_query( $db_link, $query )
+         or die( 'Error executing query: ' . mysqli_error( $db_link ) );
    } else {
       // we're not monitoring, so we just echo the thing :p
       if( $kill ) {
@@ -61,19 +61,19 @@ function get_logs( $start = 'none', $date = '' ) {
    $query .= ' ORDER BY `date` DESC';
    if( ctype_digit( $start ) )
       $query .= " LIMIT $start, " . get_setting( 'per_page' );
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $logs = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $logs[] = $row;
    return $logs;
 }
@@ -83,10 +83,10 @@ function get_logs( $start = 'none', $date = '' ) {
 function flush_logs() {
    require 'config.php';
    $query = "TRUNCATE `$db_errorlog`";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   return mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+   return mysqli_query( $db_link, $query );
 }
 ?>

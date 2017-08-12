@@ -27,10 +27,10 @@
 function get_joined( $status = 'all', $start = 'none', $bydate = 'no' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT `joinedid` FROM `$db_joined`";
 
@@ -49,22 +49,22 @@ function get_joined( $status = 'all', $start = 'none', $bydate = 'no' ) {
    if( $start != 'none' && ctype_digit( $start ) ) {
       $settingq = "SELECT `value` FROM `$db_settings` " .
          "WHERE `setting` = 'per_page'";
-      $result = mysql_query( $settingq );
-      $row = mysql_fetch_array( $result );
+      $result = mysqli_query( $db_link, $settingq );
+      $row = mysqli_fetch_array( $result );
       $limit = $row['value'];
       $query .= " LIMIT $start, $limit";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['joinedid'];
    return $ids;
 }
@@ -73,26 +73,26 @@ function get_joined( $status = 'all', $start = 'none', $bydate = 'no' ) {
 /*___________________________________________________________________________*/
 function get_joined_cats() {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error()  );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error()  );
 
    $query = "SELECT DISTINCT( `catid` ) as `id` FROM `$db_joined` ";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   if( mysql_num_rows( $result ) == 0 )
+   if( mysqli_num_rows( $result ) == 0 )
       return array(); // return empty array, no cats
 
    $query = "SELECT `catid` FROM `$db_category` WHERE ( ";
    $allcats = array();
-   while( $row = mysql_fetch_array( $result ) ) {
+   while( $row = mysqli_fetch_array( $result ) ) {
       $cats = explode( '|', $row['id'] );
       foreach( $cats as $cat )
          if( $cat != '' && !in_array( $cat, $allcats ) ) {
@@ -103,16 +103,16 @@ function get_joined_cats() {
    $query = rtrim( $query, 'OR ' ) . ' ) ';
    $query .= ' ORDER BY `catname` ASC';
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['catid'];
    return $ids;
 }
@@ -123,18 +123,18 @@ function get_joined_info( $id ) {
    require 'config.php';
    $query = "SELECT * FROM `$db_joined` WHERE `joinedid` = '$id'";
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   return mysql_fetch_array( $result );
+   return mysqli_fetch_array( $result );
 }
 
 
@@ -144,20 +144,20 @@ function get_joined_by_category( $catid ) {
    $query = "SELECT `joinedid` FROM `$db_joined` WHERE `catid` LIKE " .
       "'%|$catid|%' ORDER BY `subject`";
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['joinedid'];
    return $ids;
 }
@@ -168,35 +168,35 @@ function get_joined_by_category( $catid ) {
 function parse_joined_template( $id ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_joined` WHERE `joinedid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
 
    $query = "SELECT `setting`, `value` FROM `$db_settings` WHERE `setting` =" .
       ' "joined_images_dir" OR `setting` = "root_path_absolute" ' .
       ' OR `setting` = "root_path_web"';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $dir = '';
    $root_web = '';
    $root_abs = '';
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       if( $row['setting'] == 'joined_images_dir' )
          $dir = $row['value'];
       else if( $row['setting'] == 'root_path_absolute' )
@@ -206,20 +206,20 @@ function parse_joined_template( $id ) {
    @$image = ( $info['imagefile'] && is_file( $dir . $info['imagefile'] ) )
       ? getimagesize( $dir . $info['imagefile'] ) : '';
    // make sure $image is an array, in case getimagesize() failed
-   if( !is_array( $image ) ) 
+   if( !is_array( $image ) )
       $image = array();
    $dir = str_replace( $root_abs, $root_web, $dir );
 
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
       "'joined_template'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $setting = mysql_fetch_array( $result );
+   $setting = mysqli_fetch_array( $result );
 
    $formatted = str_replace( 'enth3-url', $info['url'], $setting['value'] );
    $formatted = str_replace( 'enth3-subject', $info['subject'], $formatted );
@@ -240,10 +240,10 @@ function parse_joined_template( $id ) {
 function search_joined( $search, $status = 'all', $start = 'none' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT `joinedid` FROM `$db_joined` WHERE ( MATCH( " .
       "`subject`, `desc`, `comments` ) " .
@@ -259,26 +259,26 @@ function search_joined( $search, $status = 'all', $start = 'none' ) {
    if( $start != 'none' && ctype_digit( $start ) ) {
       $settingq = "SELECT `value` FROM `$db_settings` " .
          "WHERE `setting` = 'per_page'";
-      $result = mysql_query( $settingq );
-      $row = mysql_fetch_array( $result );
+      $result = mysqli_query( $db_link, $settingq );
+      $row = mysqli_fetch_array( $result );
       $limit = $row['value'];
       $query .= " LIMIT $start, $limit";
    }
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['joinedid'];
    return $ids;
 }
@@ -293,19 +293,19 @@ function add_joined( $catids, $url, $subject, $desc, $comments,
    $query = "INSERT INTO `$db_joined` VALUES( null, '$cats', '$url', " .
       "'$subject', '$desc', '$comments', null, NOW(), '$pending' )";
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   return mysql_insert_id();
+   return mysqli_insert_id( $db_link );
 }
 
 
@@ -320,7 +320,7 @@ function edit_joined( $id, $image = '', $catid = array(), $url = '',
       $query .= "`imagefile` = '$image', ";
    else if( $image == 'null' )
       $query .= "`imagefile` = null, ";
-  
+
    if( count( $catid ) > 0 ) {
       $query .= "`catid` = '|" . trim( implode( '|', $catid ), '|' ) . "|', ";
    }
@@ -346,14 +346,14 @@ function edit_joined( $id, $image = '', $catid = array(), $url = '',
    $query = rtrim( $query, ', ' );
    $query .= " WHERE `joinedid` = '$id'";
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -367,14 +367,14 @@ function delete_joined( $id ) {
    require 'config.php';
    $query = "DELETE FROM `$db_joined` WHERE `joinedid` = '$id'";
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }

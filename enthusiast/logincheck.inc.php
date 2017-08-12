@@ -22,6 +22,7 @@
 
  For more information please view the readme.txt file.
 ******************************************************************************/
+require_once( 'mod_errorlogs.php' );
 require_once( 'mod_settings.php' );
 if( isset( $_COOKIE['e3login'] ) ) {
 
