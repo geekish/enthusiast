@@ -55,11 +55,11 @@ $result = mysqli_query( $db_link, $query );
 if( !$result ) {
    if( function_exists( 'log_error' ) ) {
       log_error( 'config.php',
-         'Error executing query: <i>' . mysqli_error(.
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    } else {
-      die( 'Error executing query: <i>' . mysqli_error(
+      die( 'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
    }
 }
