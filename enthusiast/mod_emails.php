@@ -27,23 +27,23 @@
 function get_email_templates() {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT `templateid` FROM `$db_emailtemplate`";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $templates = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $templates[] = $row['templateid'];
    return $templates;
 }
@@ -53,21 +53,21 @@ function get_email_templates() {
 function get_template_info( $id ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_emailtemplate` WHERE `templateid` = '$id'";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   return mysql_fetch_array( $result );
+   return mysqli_fetch_array( $result );
 }
 
 
@@ -75,18 +75,18 @@ function get_template_info( $id ) {
 function add_template( $name, $subject, $content ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "INSERT INTO `$db_emailtemplate` VALUES( " .
       "null, '$name', '$subject', '$content', 1 )";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -98,19 +98,19 @@ function add_template( $name, $subject, $content ) {
 function edit_template( $id, $name, $subject, $content ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "UPDATE `$db_emailtemplate` SET `templatename` = '$name', " .
       "`subject` = '$subject', `content` = '$content' WHERE " .
       "`templateid` = '$id'";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -122,17 +122,17 @@ function edit_template( $id, $name, $subject, $content ) {
 function delete_template( $id ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "DELETE FROM `$db_emailtemplate` WHERE `templateid` = '$id'";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -144,35 +144,35 @@ function delete_template( $id ) {
 function parse_template( $templateid, $email, $listing, $affid = 0 ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_emailtemplate` WHERE " .
       "`templateid` = '$templateid'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $subject = $row['subject'];
    $body = $row['content'];
 
    if( $listing != '' && ctype_digit( $listing ) ) {
       // it's a fanlisting, get listing info
       $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $info = mysql_fetch_array( $result );
+      $info = mysqli_fetch_array( $result );
 
       $subject = str_replace( '$$fanlisting_title$$',
          html_entity_decode( $info['title'], ENT_QUOTES ), $subject );
@@ -227,22 +227,22 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       $dbuser = $info['dbuser'];
       $dbpassword = $info['dbpassword'];
 
-      $db_link = mysql_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
-      mysql_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
+      $db_link = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      mysqli_select_db( $dbdatabase )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
       if( !ctype_digit( $affid ) || $affid == 0 ) {
          // its a member being emailed, get member info
          $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $row = mysql_fetch_array( $result );
+         $row = mysqli_fetch_array( $result );
 
          $subject = str_replace( '$$fan_email$$', $row['email'], $subject );
          $subject = str_replace( '$$fan_name$$', $row['name'], $subject );
@@ -266,14 +266,14 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
          // its an affiliate being emailed, get affiliate info
          $afftable = $table . '_affiliates';
          $query = "SELECT * FROM `$afftable` WHERE affiliateid = '$affid'";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $row = mysql_fetch_array( $result );
+         $row = mysqli_fetch_array( $result );
 
          $subject = str_replace( '$$aff_email$$', $row['email'], $subject );
          $subject = str_replace( '$$aff_id$$', $row['affiliateid'], $subject );
@@ -291,27 +291,27 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       // it's a collective affiliate we're emailing, probably!
       // get affiliate info
       $query = "SELECT * FROM `$db_affiliates` WHERE `affiliateid` = '$affid'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $info = mysql_fetch_array( $result );
+      $info = mysqli_fetch_array( $result );
 
       // get collective values
       $query = "SELECT `setting`, `value` FROM `$db_settings` WHERE " .
          "`setting` = 'collective_title' OR `setting` = 'collective_url' OR " .
          "`setting` = 'owner_email' OR `setting` = 'owner_name'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      while( $row = mysql_fetch_array( $result ) ) {
+      while( $row = mysqli_fetch_array( $result ) ) {
          switch( $row['setting'] ) {
             case 'collective_title' :
                $title = $row['value']; break;
@@ -355,22 +355,22 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
 function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    if( $listing != '' && ctype_digit( $listing ) ) {
       // it's a fanlisting, get listing info
       $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $info = mysql_fetch_array( $result );
+      $info = mysqli_fetch_array( $result );
 
       $subject = str_replace( '$$fanlisting_title$$',
          html_entity_decode( $info['title'], ENT_QUOTES ),
@@ -426,22 +426,22 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       $dbuser = $info['dbuser'];
       $dbpassword = $info['dbpassword'];
 
-      $db_link = mysql_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
-      mysql_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysql_error() );
+      $db_link = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      mysqli_select_db( $dbdatabase )
+         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
       if( !ctype_digit( $affid ) || $affid == 0 ) {
          // its a member being emailed, get member info
          $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $row = mysql_fetch_array( $result );
+         $row = mysqli_fetch_array( $result );
 
          $subject = str_replace( '$$fan_email$$', $row['email'], $subject );
          $subject = str_replace( '$$fan_name$$',
@@ -470,14 +470,14 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
          // its an affiliate being emailed, get affiliate info
          $afftable = $table . '_affiliates';
          $query = "SELECT * FROM `$afftable` WHERE affiliateid = '$affid'";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $row = mysql_fetch_array( $result );
+         $row = mysqli_fetch_array( $result );
 
          $subject = str_replace( '$$aff_email$$', $row['email'], $subject );
          $subject = str_replace( '$$aff_id$$', $row['affiliateid'], $subject );
@@ -495,27 +495,27 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       // it's a collective affiliate we're emailing, probably!
       // get affiliate info
       $query = "SELECT * FROM `$db_affiliates` WHERE `affiliateid` = '$affid'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $info = mysql_fetch_array( $result );
+      $info = mysqli_fetch_array( $result );
 
       // get collective values
       $query = "SELECT `setting`, `value` FROM `$db_settings` WHERE " .
          "`setting` = 'collective_title' OR `setting` = 'collective_url' OR " .
          "`setting` = 'owner_email' OR `setting` = 'owner_name'";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      while( $row = mysql_fetch_array( $result ) ) {
+      while( $row = mysqli_fetch_array( $result ) ) {
          switch( $row['setting'] ) {
             case 'collective_title' :
                $title = $row['value']; break;
@@ -564,31 +564,31 @@ function send_email( $to, $from, $subject, $body ) {
       include_once( 'Mail.php' );
    }
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get email settings
    $settingq = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
       "'mail_settings'";
-   $result = mysql_query( $settingq );
-   $row = mysql_fetch_array( $result );
+   $result = mysqli_query( $db_link, $settingq );
+   $row = mysqli_fetch_array( $result );
    $use_mailer = ( count( $row ) ) ? $row['value'] : 'php';
 
    // php: use native php
    // sendmail: use sendmail
    // smtp: use smtp
 
-   $mail_sent = false;   
+   $mail_sent = false;
    if( $use_mailer == 'sendmail' ) {
       // get sendmail settings
       $settingq = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
          "'sendmail_path'";
-      $result = mysql_query( $settingq );
-      $row = mysql_fetch_array( $result );
+      $result = mysqli_query( $db_link, $settingq );
+      $row = mysqli_fetch_array( $result );
       $sendmail_path = ( count( $row ) ) ? $row['value'] : '/usr/bin/sendmail';
-      
+
       // setup pear mail
       $headers = array( 'From' => $from,
          'To' => $to,
@@ -613,16 +613,16 @@ function send_email( $to, $from, $subject, $body ) {
       // get smtp settings
       $settingq = "SELECT `setting`, `value` FROM `$db_settings` WHERE " .
          "`setting` LIKE 'smtp_%'";
-      $result = mysql_query( $settingq );
+      $result = mysqli_query( $db_link, $settingq );
       $smtp_host = '';
       $smtp_port = '';
       $smtp_auth = '';
       $smtp_username = '';
       $smtp_password = '';
-      while( $row = mysql_fetch_array( $result ) ) {
+      while( $row = mysqli_fetch_array( $result ) ) {
          $$row['setting'] = $row['value'];
       }
-      
+
       // setup pear mail
       $headers = array( 'From' => $from,
          'To' => $to,
@@ -647,7 +647,7 @@ function send_email( $to, $from, $subject, $body ) {
          $mail_sent = true;
       }
    } // end if sendmail or smtp
-   
+
    if( !$mail_sent || $use_mailer == 'php' ) {
       $headers = "From: $from\r\n";
       $success = @mail( $to, $subject, $body, $headers );
@@ -659,7 +659,7 @@ function send_email( $to, $from, $subject, $body ) {
          $mail_sent = true;
       }
    }
-   
+
    return $mail_sent;
 }
 ?>

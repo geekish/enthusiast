@@ -22,15 +22,15 @@
 
  For more information please view the readme.txt file.
 ******************************************************************************/
-	
+
 /*___________________________________________________________________________*/
 function get_owned( $status = 'all', $start = 'none', $bydate = 'no' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT `listingid` FROM `$db_owned`";
 
@@ -49,22 +49,22 @@ function get_owned( $status = 'all', $start = 'none', $bydate = 'no' ) {
    if( $start != 'none' && ctype_digit( $start ) ) {
       $settingq = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
          "'per_page'";
-      $result = mysql_query( $settingq );
-      $row = mysql_fetch_array( $result );
+      $result = mysqli_query( $db_link, $settingq );
+      $row = mysqli_fetch_array( $result );
       $limit = $row['value'];
       $query .= " LIMIT $start, $limit";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['listingid'];
    return $ids;
 }
@@ -76,24 +76,24 @@ function get_owned( $status = 'all', $start = 'none', $bydate = 'no' ) {
 function get_listing_info( $id = '', $table = '' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
    if( $table )
       $query = "SELECT * FROM `$db_owned` WHERE `dbtable` = '$table'";
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    if( count( $row ) == 0 || !$row )
       return array();
 
@@ -250,7 +250,7 @@ function show_edit_forms() {
       entirely from the field.<br />
       Additional fields must be ALL LOWERCASE, with NO SPACES and NO
       PUNCTUATION and NO SPECIAL CHARACTERS; if you wish for the field to
-      have a space in its "name", use an underscore. For example: 
+      have a space in its "name", use an underscore. For example:
       <i>favorite_book, do_you_like_apples</i><br />
       Deleting an existing field will cause its contents to be discarded
       and this cannot be undone.</small><br />
@@ -558,7 +558,7 @@ function show_edit_forms() {
       <tr class="rowshade"><td>
       Link target
       </td><td style="text-align: left;">
-      <input type="text" name="linktarget" value="<?php echo $info['linktarget'] 
+      <input type="text" name="linktarget" value="<?php echo $info['linktarget']
          ?>" /><br />
       </td></tr>
 
@@ -694,20 +694,20 @@ function edit_owned( $id, $fields ) {
    $changes = array();
 
    // get listing info
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
    $table = $info['dbtable'];
    $dbserver = $info['dbserver'];
    $dbdatabase = $info['dbdatabase'];
@@ -728,10 +728,10 @@ function edit_owned( $id, $fields ) {
             if( $value == 'null' )
                $query = "UPDATE `$db_owned` SET `$field` = null WHERE " .
                   "`listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -741,29 +741,29 @@ function edit_owned( $id, $fields ) {
          case 'dbtable' :
             if( $value != $table ) {
                // change data! we actually change the database table
-               $db_link_list = mysql_connect( $dbserver, $dbuser,
-                  $dbpassword ) or die( DATABASE_CONNECT_ERROR . mysql_error() );
-               mysql_select_db( $dbdatabase )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
+               $db_link_list = mysqli_connect( $dbserver, $dbuser,
+                  $dbpassword ) or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+               mysqli_select_db( $db_link_list, $dbdatabase )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
                // rename physically
                $query = "ALTER TABLE `$table` RENAME `$value`";
-               $result = mysql_query( $query, $db_link_list );
+               $result = mysqli_query( $db_link_list, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
                // update db_owned table
                $query = "UPDATE `$db_owned` SET `dbtable` = '$value' WHERE " .
                   "`listingid` = '$id'";
-               $result = mysql_query( $query, $db_link );
+               $result = mysqli_query( $query, $db_link );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -775,30 +775,30 @@ function edit_owned( $id, $fields ) {
             // get info
             if( $value == 'leave' )
                continue;
-            $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-               or die( DATABASE_CONNECT_ERROR . mysql_error() );
-            mysql_select_db( $dbdatabase )
-               or die( DATABASE_CONNECT_ERROR . mysql_error() );
+            $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+               or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            mysqli_select_db( $db_link_list, $dbdatabase )
+               or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
             if( $value == 'disable' ) {
                // alter table
                $query = "ALTER TABLE `$table` DROP `country`";
-               $result = mysql_query( $query, $db_link_list );
+               $result = mysqli_query( $db_link_list, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
                // update db_owned
                $query = "UPDATE `$db_owned` SET `country` = 0 WHERE " .
                   "`listingid` = '$id'";
-               $result = mysql_query( $query, $db_link );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -808,42 +808,42 @@ function edit_owned( $id, $fields ) {
                // alter table
                $query = "ALTER TABLE `$table` ADD `country` VARCHAR(128) " .
                   "NOT NULL default '' AFTER `name`";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
 
                // drop fulltext index
                $query = "ALTER TABLE `$table` DROP INDEX `email`";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                }
 
                // re-add fulltext index
                $query = "ALTER TABLE `$table` ADD FULLTEXT ( `email`, " .
                   "`name`, `country`, `url` )";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
                // update db_owned
                $query = "UPDATE `$db_owned` SET `country` = 1 WHERE " .
                   "`listingid` = '$id'";
-               $result = mysql_query( $query, $db_link );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -857,42 +857,42 @@ function edit_owned( $id, $fields ) {
                continue;
 
             // connect to remote table
-            $db_link_list = mysql_connect( $dbserver, $dbuser, $dbpassword )
-               or die( DATABASE_CONNECT_ERROR . mysql_error() );
-            mysql_select_db( $dbdatabase )
-               or die( DATABASE_CONNECT_ERROR . mysql_error() );
+            $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
+               or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
+            mysqli_select_db( $dbdatabase )
+               or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
             if( $value == 'disable' ) {
                // drop aff table
                $afftable = $table . '_affiliates';
                $query = "DROP TABLE `$afftable`";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
-               $db_link = mysql_connect( $db_server, $db_user, $db_password )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
-               mysql_select_db( $db_database )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
+               $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+               mysqli_select_db( $db_link, $db_database )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
                // update db_owned
                $query = "UPDATE `$db_owned` SET `affiliates` = 0, " .
                   "`affiliatesdir` = NULL WHERE `listingid` = '$id'";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -910,48 +910,48 @@ function edit_owned( $id, $fields ) {
                   "`added` DATE NOT NULL default '0000-00-00', " .
                   "PRIMARY KEY( affiliateid ) " .
                   ") TYPE=MyISAM AUTO_INCREMENT=1";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
-               $db_link = mysql_connect( $db_server, $db_user, $db_password )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
-               mysql_select_db( $db_database )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
+               $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
+               mysqli_select_db( $db_link, $db_database )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
                // set db_owned
                $query = "UPDATE `$db_owned` SET `affiliates` = 1, " .
                   "`affiliatesdir` = '" . $fields['affiliatesdir'] .
                   "' WHERE `listingid` = '$id'";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
                $changes[] = 'Affiliates feature enabled.';
 
             } else if( $value == 'rename' ) {
-               mysql_close( $db_link_list ); // no need for remote database
+               mysqli_close( $db_link_list ); // no need for remote database
 
                // connect to actual database
-               $db_link = mysql_connect( $db_server, $db_user, $db_password )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
-               mysql_select_db( $db_database )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
+               $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+               mysqli_select_db( $db_link, $db_database )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
                $query = "UPDATE `$db_owned` SET `affiliatesdir` = '" .
                   $fields['affiliatesdir'] . "' WHERE `listingid` = '$id'";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -970,17 +970,17 @@ function edit_owned( $id, $fields ) {
                $dbuser = $info['dbuser'];
                $dbpassword = $info['dbpassword'];
 
-               $db_link_list = mysql_connect( $dbserver, $dbuser,
-                  $dbpassword ) or die( DATABASE_CONNECT_ERROR . mysql_error() );
-               mysql_select_db( $dbdatabase )
-                  or die( DATABASE_CONNECT_ERROR . mysql_error() );
+               $db_link_list = mysqli_connect( $dbserver, $dbuser,
+                  $dbpassword ) or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+               mysqli_select_db( $db_link_list, $dbdatabase )
+                  or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
                // get current additional fields
                $query = "DESCRIBE `$table`";
-               $result = mysql_query( $query ) or die( mysql_error() );
+               $result = mysqli_query( $db_link, $query ) or die( mysqli_error() );
                $current = array();
                $start = false;
-               while( $row = mysql_fetch_array( $result ) ) {
+               while( $row = mysqli_fetch_array( $result ) ) {
                   if( $row['Field'] == 'url' ) {
                      $start = true;
                      continue;
@@ -1007,10 +1007,10 @@ function edit_owned( $id, $fields ) {
                         // delete the field
                         $query = "ALTER TABLE `$table` DROP `" .
                            $current[$index] . '`';
-                        $result = mysql_query( $query, $db_link_list );
+                        $result = mysqli_query( $db_link_list, $query );
                         if( !$result ) {
                            log_error( __FILE__ . ':' . __LINE__,
-                              'Error executing query: <i>' . mysql_error() .
+                              'Error executing query: <i>' . mysqli_error() .
                               '</i>; Query is: <code>' . $query . '</code>' );
                            die( STANDARD_ERROR );
                         }
@@ -1018,10 +1018,10 @@ function edit_owned( $id, $fields ) {
                         // add after the previous column
                         $query = "ALTER TABLE `$table` ADD COLUMN `$new` " .
                            "VARCHAR(255) DEFAULT NULL AFTER `$prev`";
-                        $result = mysql_query( $query, $db_link_list );
+                        $result = mysqli_query( $db_link_list, $query );
                         if( !$result ) {
                            log_error( __FILE__ . ':' . __LINE__,
-                              'Error executing query: <i>' . mysql_error() .
+                              'Error executing query: <i>' . mysqli_error() .
                               '</i>; Query is: <code>' . $query . '</code>' );
                            die( STANDARD_ERROR );
                         }
@@ -1031,10 +1031,10 @@ function edit_owned( $id, $fields ) {
                         $query = "ALTER TABLE `$table` CHANGE `" .
                            $current[$index] . "` `$new` " .
                            "VARCHAR(255) DEFAULT NULL";
-                        $result = mysql_query( $query, $db_link_list );
+                        $result = mysqli_query( $db_link_list, $query );
                         if( !$result ) {
                            log_error( __FILE__ . ':' . __LINE__,
-                              'Error executing query: <i>' . mysql_error() .
+                              'Error executing query: <i>' . mysqli_error() .
                               '</i>; Query is: <code>' . $query . '</code>' );
                            die( STANDARD_ERROR );
                         }
@@ -1044,16 +1044,16 @@ function edit_owned( $id, $fields ) {
 
                } // end foreach value as index -> new
 
-               mysql_close( $db_link_list );
+               mysqli_close( $db_link_list );
 
                // update db_owned
                $additionaltext = str_replace( ',,', ',', $additionaltext );
                $query = "UPDATE `$db_owned` SET `additional` = " .
                   "'$additionaltext' WHERE `listingid` = '$id'";
-               @mysql_query( $query, $db_link );
+               mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -1076,10 +1076,10 @@ function edit_owned( $id, $fields ) {
             else if( $value == 'current' )
                $status = 2;
             $query .= "$status WHERE `listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -1095,10 +1095,10 @@ function edit_owned( $id, $fields ) {
             if( $new == $info['opened'] ) continue;
             $query = "UPDATE `$db_owned` SET `opened` = '$new' " .
                 "WHERE `listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -1111,14 +1111,14 @@ function edit_owned( $id, $fields ) {
                // get absolute path
                $query = "SELECT `value` FROM `$db_settings` WHERE " .
                   '`setting` = "owned_images_dir"';
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               $row = mysql_fetch_array( $result );
+               $row = mysqli_fetch_array( $result );
                $dir = $row['value'];
 
                $success = @unlink( $dir . $info['imagefile'] );
@@ -1126,10 +1126,10 @@ function edit_owned( $id, $fields ) {
                   $changes[] = 'Image deleted.';
                   $query = "UPDATE `$db_owned` SET `imagefile` = NULL WHERE " .
                      "`listingid` = '$id'";
-                  $result = mysql_query( $query );
+                  $result = mysqli_query( $db_link, $query );
                   if( !$result ) {
                      log_error( __FILE__ . ':' . __LINE__,
-                        'Error executing query: <i>' . mysql_error() .
+                        'Error executing query: <i>' . mysqli_error() .
                         '</i>; Query is: <code>' . $query . '</code>' );
                      die( STANDARD_ERROR );
                   }
@@ -1142,14 +1142,14 @@ function edit_owned( $id, $fields ) {
                // get absolute path
                $query = "SELECT `value` FROM `$db_settings` WHERE " .
                   '`setting` = "owned_images_dir"';
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
-               $row = mysql_fetch_array( $result );
+               $row = mysqli_fetch_array( $result );
                $dir = $row['value'];
 
                // delete the old image file
@@ -1170,10 +1170,10 @@ function edit_owned( $id, $fields ) {
                   $file = $fields['imagefile'];
                   $query = "UPDATE `$db_owned` SET `imagefile` = '$file' " .
                      "WHERE `listingid` = '$id'";
-                  $result = mysql_query( $query );
+                  $result = mysqli_query( $db_link, $query );
                   if( !$result ) {
                      log_error( __FILE__ . ':' . __LINE__,
-                        'Error executing query: <i>' . mysql_error() .
+                        'Error executing query: <i>' . mysqli_error() .
                         '</i>; Query is: <code>' . $query . '</code>' );
                      die( STANDARD_ERROR );
                   }
@@ -1192,10 +1192,10 @@ function edit_owned( $id, $fields ) {
                // update db_owned
                $query = "UPDATE `$db_owned` SET `dbpassword` = '$value' " .
                   "WHERE `listingid` = '$id'";
-               $result = mysql_query( $query );
+               $result = mysqli_query( $db_link, $query );
                if( !$result ) {
                   log_error( __FILE__ . ':' . __LINE__,
-                     'Error executing query: <i>' . mysql_error() .
+                     'Error executing query: <i>' . mysqli_error() .
                      '</i>; Query is: <code>' . $query . '</code>' );
                   die( STANDARD_ERROR );
                }
@@ -1219,10 +1219,10 @@ function edit_owned( $id, $fields ) {
             else
                continue;
             $query .= "$set WHERE `listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -1245,10 +1245,10 @@ function edit_owned( $id, $fields ) {
                continue;
             $query = "UPDATE `$db_owned` SET `catid` = '$cats' " .
                "WHERE `listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -1286,10 +1286,10 @@ function edit_owned( $id, $fields ) {
             if( $value == 'null' )
                $query = "UPDATE `$db_owned` SET `$field` = null WHERE " .
                   "`listingid` = '$id'";
-            $result = mysql_query( $query );
+            $result = mysqli_query( $db_link, $query );
             if( !$result ) {
                log_error( __FILE__ . ':' . __LINE__,
-                  'Error executing query: <i>' . mysql_error() .
+                  'Error executing query: <i>' . mysqli_error() .
                   '</i>; Query is: <code>' . $query . '</code>' );
                die( STANDARD_ERROR );
             }
@@ -1354,21 +1354,21 @@ function edit_owned( $id, $fields ) {
 function delete_owned( $id ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get table info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $server = $row['dbserver'];
    $user = $row['dbuser'];
    $password = $row['dbpassword'];
@@ -1379,49 +1379,49 @@ function delete_owned( $id ) {
    //get $dir setting
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
       "'owned_images_dir'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $dir = $row['value'];
 
    // delete from $db_owned
    $query = "DELETE FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    // connect to proper database
-   $db_link_list = mysql_connect( $server, $user, $password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link_list = mysqli_connect( $server, $user, $password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
+   mysqli_select_db( $db_link_list, $database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // drop affiliates table
    $afftable = $table . '_affiliates';
    $query = "DROP TABLE IF EXISTS `$afftable`";
-   mysql_query( $query );
+   mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    // drop actual table
    $query = "DROP TABLE `$table`";
-   mysql_query( $query );
+   mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -1437,10 +1437,10 @@ function delete_owned( $id ) {
 /*___________________________________________________________________________*/
 function get_owned_cats( $status = 'all' ) {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT DISTINCT( `catid` ) as `id` FROM `$db_owned`";
    if( $status && $status != 'all' ) {
@@ -1452,19 +1452,19 @@ function get_owned_cats( $status = 'all' ) {
          $query .= " WHERE `status` = 2";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   if( mysql_num_rows( $result ) == 0 )
+   if( mysqli_num_rows( $result ) == 0 )
       return array(); // return empty array, no cats
 
    $query = "SELECT `catid` FROM `$db_category` WHERE ( ";
    $allcats = array();
-   while( $row = mysql_fetch_array( $result ) ) {
+   while( $row = mysqli_fetch_array( $result ) ) {
       $cats = explode( '|', $row['id'] );
       foreach( $cats as $cat )
          if( $cat != '' && !in_array( $cat, $allcats ) ) {
@@ -1474,16 +1474,16 @@ function get_owned_cats( $status = 'all' ) {
    }
    $query = rtrim( $query, 'OR ' ) . ' ) ';
    $query .= ' ORDER BY `catname` ASC';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['catid'];
    return $ids;
 }
@@ -1493,34 +1493,34 @@ function get_owned_cats( $status = 'all' ) {
 function parse_owned_template( $id ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    // get date setting
    $query = "SELECT `value` FROM `$db_settings` WHERE " .
       "`setting` = 'date_format'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $datesetting = mysql_fetch_array( $result );
+   $datesetting = mysqli_fetch_array( $result );
    $dateformat = $datesetting['value'];
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
 
    // find categories this is listed under (collective cats)
    $cats = '';
@@ -1544,17 +1544,17 @@ function parse_owned_template( $id ) {
    $query = "SELECT `setting`, `value` FROM `$db_settings` WHERE `setting` " .
       '= "owned_images_dir" OR `setting` = "root_path_absolute" OR ' .
       '`setting` = "root_path_web"';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $dir = '';
    $root_web = '';
    $root_abs = '';
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       if( $row['setting'] == 'owned_images_dir' )
          $dir = $row['value'];
       else if( $row['setting'] == 'root_path_absolute' )
@@ -1564,20 +1564,20 @@ function parse_owned_template( $id ) {
    $image = ( $info['imagefile'] && is_file( $dir . $info['imagefile'] ) )
       ? getimagesize( $dir . $info['imagefile'] ) : array( '', '', '' );
    // make sure $image is an array, in case getimagesize() failed
-   if( !is_array( $image ) ) 
+   if( !is_array( $image ) )
       $image = array();
    $dir = str_replace( $root_abs, $root_web, $dir );
 
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
       "'owned_template'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $setting = mysql_fetch_array( $result );
+   $setting = mysqli_fetch_array( $result );
 
    // get listing stats now
    $stats = get_listing_stats( $info['listingid'] );
@@ -1625,20 +1625,20 @@ function get_owned_by_category( $catid, $status = 'all' ) {
       $query .= " AND status = '$status'";
    $query .= ' ORDER BY `subject`';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['listingid'];
    return $ids;
 }
@@ -1648,10 +1648,10 @@ function get_owned_by_category( $catid, $status = 'all' ) {
 function search_owned( $search, $status = 'all', $start = 'none' ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT `listingid` FROM `$db_owned` WHERE ( MATCH( " .
       "`title`, `subject`, `url`, `desc` ) AGAINST( '$search' ) " .
@@ -1668,28 +1668,28 @@ function search_owned( $search, $status = 'all', $start = 'none' ) {
 
    if( $start != 'none' && ctype_digit( $start ) ) {
       $settingq = "SELECT value FROM $db_settings WHERE setting = 'per_page'";
-      $result = mysql_query( $settingq );
+      $result = mysqli_query( $db_link, $settingq );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $row = mysql_fetch_array( $result );
+      $row = mysqli_fetch_array( $result );
       $limit = $row['value'];
       $query .= " LIMIT $start, $limit";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
 
    $ids = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $ids[] = $row['listingid'];
    return $ids;
 }
@@ -1699,29 +1699,29 @@ function search_owned( $search, $status = 'all', $start = 'none' ) {
 function get_listing_stats( $id, $extended = false ) {
    require 'config.php';
 
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $info = mysql_fetch_array( $result );
+   $info = mysqli_fetch_array( $result );
 
-   $db_link_list = mysql_connect( $info['dbserver'], $info['dbuser'],
+   $db_link_list = mysqli_connect( $info['dbserver'], $info['dbuser'],
       $info['dbpassword'] );
    if( $db_link_list === false ) {
       echo '<p class="error">' . DATABASE_CONNECT_ERROR .
          " Can't connect to MySQL server on {$info['dbserver']}</p>";
       return;
    }
-   $dbselected = mysql_select_db( $info['dbdatabase'], $db_link_list );
+   $dbselected = mysqli_select_db( $db_link_list, $info['dbdatabase'] );
    if( !$dbselected ) {
       echo '<p class="error">' . DATABASE_CONNECT_ERROR .
          " Can't connect to MySQL database '{$info['dbdatabase']}'</p>";
@@ -1735,42 +1735,42 @@ function get_listing_stats( $id, $extended = false ) {
    // get added date in main table - make sure it is only approved members
    $query = "SELECT `added` FROM `$table` WHERE `pending` = 0 " .
       'ORDER BY `added` DESC LIMIT 1';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $stats['lastupdated'] = $row['added'];
 
    // get most recent members
    $query = "SELECT * FROM `$table` WHERE `added` = '" .
       $stats['lastupdated'] . '\'';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $new = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $new[] = $row;
 
    // get added date in affiliates table if affiliates is present
    if( $info['affiliates'] == 1 ) {
       $query = "SELECT `added` FROM `$afftable` ORDER BY `added` " .
          'DESC LIMIT 1';
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $row = mysql_fetch_array( $result );
+      $row = mysqli_fetch_array( $result );
 
       if( $row['added'] && $row['added'] > $stats['lastupdated'] )
          $stats['lastupdated'] = $row['added'];
@@ -1779,15 +1779,15 @@ function get_listing_stats( $id, $extended = false ) {
          // now we take the newest affiliates added
          $query = "SELECT * FROM `$afftable` WHERE `added` = '" .
             $row['added'] . "'";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
          $affrows = array();
-         while( $affrow = mysql_fetch_array( $result ) )
+         while( $affrow = mysqli_fetch_array( $result ) )
             $affrows[] = $affrow;
 
          // prep new affiliates
@@ -1809,16 +1809,16 @@ function get_listing_stats( $id, $extended = false ) {
          }
          $stats['newaffiliates'] = rtrim( $newaffiliates, ', ' );
          $stats['newaffiliatesimg'] = $newaffiliates_img;
-   
+
          // sigh, reconnect :p
-         $db_link_list = mysql_connect( $info['dbserver'], $info['dbuser'],
+         $db_link_list = mysqli_connect( $info['dbserver'], $info['dbuser'],
             $info['dbpassword'] );
          if( $db_link_list === false ) {
             echo '<p class="error">' . DATABASE_CONNECT_ERROR .
                " Can't connect to MySQL server on {$info['dbserver']}</p>";
             return;
          }
-         $dbselected = mysql_select_db( $info['dbdatabase'] );
+         $dbselected = mysqli_select_db( $db_link_list, $info['dbdatabase'] );
          if( !$dbselected ) {
             echo '<p class="error">' . DATABASE_CONNECT_ERROR .
                " Can't connect to MySQL database '{$info['dbdatabase']}'</p>";
@@ -1827,27 +1827,27 @@ function get_listing_stats( $id, $extended = false ) {
 
          // get total affiliates
          $query = "SELECT COUNT(*) AS `count` FROM `$afftable`";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $affnum = mysql_fetch_array( $result );
+         $affnum = mysqli_fetch_array( $result );
          $stats['totalaffiliates'] = $affnum['count'];
 
          // random affiliate
          $rand = rand( 1, $stats['totalaffiliates'] ) - 1;
          $query = "SELECT * FROM `$afftable` LIMIT $rand, 1";
-         $result = mysql_query( $query );
+         $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysql_error() .
+               'Error executing query: <i>' . mysqli_error() .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
-         $randaff = mysql_fetch_array( $result );
+         $randaff = mysqli_fetch_array( $result );
          $stats['randomaffiliate'] = '<a href="' . $randaff['url'];
          if( $info['linktarget'] ) {
             $stats['randomaffiliate'] .= '" target="' . $info['linktarget'];
@@ -1857,14 +1857,14 @@ function get_listing_stats( $id, $extended = false ) {
             $randaff['affiliateid'], $info['listingid'] );
 
          // sigh, reconnect :p
-         $db_link_list = mysql_connect( $info['dbserver'], $info['dbuser'],
+         $db_link_list = mysqli_connect( $info['dbserver'], $info['dbuser'],
             $info['dbpassword'] );
          if( $db_link_list === false ) {
             echo '<p class="error">' . DATABASE_CONNECT_ERROR .
                " Can't connect to MySQL server on {$info['dbserver']}</p>";
             return;
          }
-         $dbselected = mysql_select_db( $info['dbdatabase'] );
+         $dbselected = mysqli_select_db( $db_link_list, $info['dbdatabase'] );
          if( !$dbselected ) {
             echo '<p class="error">' . DATABASE_CONNECT_ERROR .
                " Can't connect to MySQL database '{$info['dbdatabase']}'</p>";
@@ -1894,27 +1894,27 @@ function get_listing_stats( $id, $extended = false ) {
 
    // get total number of members
    $query = "SELECT COUNT(*) AS `count` FROM `$table` WHERE `pending` = 0";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $stats['total'] = $row['count'];
-   
+
    // random member
    $rand = rand( 1, $stats['total'] ) - 1;
    $query = "SELECT * FROM `$table` WHERE `pending` = 0 LIMIT $rand, 1";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $randmem = mysql_fetch_array( $result );
+   $randmem = mysqli_fetch_array( $result );
    $stats['randommember'] = $randmem['name'];
    if( $randmem['url'] && $randmem['showurl'] == 1 ) {
       $stats['randommember'] = '<a href="' . $randmem['url'];
@@ -1939,14 +1939,14 @@ function get_listing_stats( $id, $extended = false ) {
 
    // get total number of PENDING members
    $query = "SELECT COUNT(*) AS `count` FROM `$table` WHERE `pending` = 1";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $stats['pending'] = $row['count'];
 
    // prepare average number of new fans a day
@@ -1954,14 +1954,14 @@ function get_listing_stats( $id, $extended = false ) {
       "`month`, DAYOFMONTH( `added` ) AS `day` FROM `$table` WHERE " .
       "`pending` = 0 AND `added` != '0000-00-00' ORDER BY `added` ASC " .
       'LIMIT 1';
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    $firstyear = $row['year'];
    $firstmonth = $row['month'];
    $firstday = $row['day'];
@@ -1977,18 +1977,18 @@ function get_listing_stats( $id, $extended = false ) {
    if( $info['country'] == 1 ){
       $query = 'SELECT COUNT( DISTINCT( `country` ) ) AS `countries` FROM ' .
          "`$table` WHERE `pending` = 0";
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $row = mysql_fetch_array( $result );
+      $row = mysqli_fetch_array( $result );
       $stats['countries'] = $row['countries'];
    } else $stats['countries'] = '0';
 
-   @mysql_close( $db_link_list );
+   mysqli_close( $db_link_list );
    return $stats;
 }
 ?>

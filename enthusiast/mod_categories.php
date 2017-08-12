@@ -27,10 +27,10 @@
 /*___________________________________________________________________________*/
 function enth_get_categories( $search = '', $start = 'none' ) {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $query = "SELECT * FROM `$db_category` ORDER BY `catname`";
 
@@ -41,21 +41,21 @@ function enth_get_categories( $search = '', $start = 'none' ) {
    if( $start != 'none' && ctype_digit( $start ) ) {
       $settingq = "SELECT `value` FROM `$db_settings` " .
          "WHERE `setting` = 'per_page'";
-      $result = mysql_query( $settingq );
-      $row = mysql_fetch_array( $result );
+      $result = mysqli_query( $db_link, $settingq );
+      $row = mysqli_fetch_array( $result );
       $limit = $row['value'];
       $query .= " LIMIT $start, $limit";
    }
 
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $cats = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $cats[] = $row;
 
    // get children, if there is a search
@@ -74,14 +74,14 @@ function add_category( $cat, $parent = 0 ) {
    require 'config.php';
    $query = "INSERT INTO `$db_category` ( `catid`, `catname`, `parent` ) " .
       "VALUES( null, '$cat', '$parent' )";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -93,18 +93,18 @@ function add_category( $cat, $parent = 0 ) {
 function get_category_name( $id ) {
    require 'config.php';
    $query = "SELECT `catname` FROM `$db_category` WHERE `catid` = '$id'";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result );
+   $row = mysqli_fetch_array( $result );
    return $row['catname'];
 }
 
@@ -113,14 +113,14 @@ function get_category_name( $id ) {
 function delete_category( $id ) {
    require 'config.php';
    $query = "DELETE FROM `$db_category` WHERE `catid` = '$id'";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -137,14 +137,14 @@ function edit_category( $id, $catname, $parent ) {
    else
       $query .= ", `parent` = 0 ";
    $query .= "WHERE `catid` = '$id'";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -157,19 +157,19 @@ function get_enth_category_children( $id ) {
    if( !is_numeric( $id ) )
       return array(); // return empty array in case id is not actual id
    $query = "SELECT * FROM `$db_category` WHERE `parent` = '$id'";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
    $cats = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysqli_fetch_array( $result ) )
       $cats[] = $row;
    return $cats;
 }
@@ -178,18 +178,18 @@ function get_enth_category_children( $id ) {
 function get_category_parent( $id ) {
    require 'config.php';
    $query = "SELECT `parent` FROM `$db_category` WHERE `catid` = '$id'";
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   $result = mysql_query( $query );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   if( $row = mysql_fetch_array( $result ) )
+   if( $row = mysqli_fetch_array( $result ) )
       return $row['parent'];
    else
       return 0;
@@ -199,34 +199,34 @@ function get_category_parent( $id ) {
 /*___________________________________________________________________________*/
 function get_ancestors( $id ) {
    require 'config.php';
-   $db_link = mysql_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
-   mysql_select_db( $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysql_error() );
+   $db_link = mysqli_connect( $db_server, $db_user, $db_password )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   mysqli_select_db( $db_link, $db_database )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
 
    $family = array();
    $family[] = $id;
    $query = "SELECT `parent` FROM `$db_category` WHERE `catid` = '$id'";
-   $result = mysql_query( $query );
+   $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysql_error() .
+         'Error executing query: <i>' . mysqli_error() .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
-   $row = mysql_fetch_array( $result ); $i = 0;
+   $row = mysqli_fetch_array( $result ); $i = 0;
    while( $row['parent'] != 0 && $row['parent'] != '' ) {
       $family[] = $row['parent'];
       $query = "SELECT `parent` FROM `$db_category` WHERE `catid` = '" .
          $row['parent'] . '\'';
-      $result = mysql_query( $query );
+      $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysql_error() .
+            'Error executing query: <i>' . mysqli_error() .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
-      $row = mysql_fetch_array( $result );
+      $row = mysqli_fetch_array( $result );
    }
    return $family;
 }
