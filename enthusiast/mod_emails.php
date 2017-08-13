@@ -28,16 +28,16 @@ function get_email_templates() {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "SELECT `templateid` FROM `$db_emailtemplate`";
 
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -54,16 +54,16 @@ function get_template_info( $id ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "SELECT * FROM `$db_emailtemplate` WHERE `templateid` = '$id'";
 
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -76,9 +76,9 @@ function add_template( $name, $subject, $content ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "INSERT INTO `$db_emailtemplate` VALUES( " .
       "null, '$name', '$subject', '$content', 1 )";
@@ -86,7 +86,7 @@ function add_template( $name, $subject, $content ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -99,9 +99,9 @@ function edit_template( $id, $name, $subject, $content ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "UPDATE `$db_emailtemplate` SET `templatename` = '$name', " .
       "`subject` = '$subject', `content` = '$content' WHERE " .
@@ -110,7 +110,7 @@ function edit_template( $id, $name, $subject, $content ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -123,16 +123,16 @@ function delete_template( $id ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "DELETE FROM `$db_emailtemplate` WHERE `templateid` = '$id'";
 
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -145,16 +145,16 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "SELECT * FROM `$db_emailtemplate` WHERE " .
       "`templateid` = '$templateid'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -168,7 +168,7 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -228,9 +228,9 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
       if( !ctype_digit( $affid ) || $affid == 0 ) {
          // its a member being emailed, get member info
@@ -238,7 +238,7 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
          $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -269,7 +269,7 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
          $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -294,7 +294,7 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -307,7 +307,7 @@ function parse_template( $templateid, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -356,9 +356,9 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    if( $listing != '' && ctype_digit( $listing ) ) {
       // it's a fanlisting, get listing info
@@ -366,7 +366,7 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -427,9 +427,9 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
       if( !ctype_digit( $affid ) || $affid == 0 ) {
          // its a member being emailed, get member info
@@ -437,7 +437,7 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
          $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -473,7 +473,7 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
          $result = mysqli_query( $db_link, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -498,7 +498,7 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -511,7 +511,7 @@ function parse_email_text( $subject, $body, $email, $listing, $affid = 0 ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -565,9 +565,9 @@ function send_email( $to, $from, $subject, $body ) {
    }
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get email settings
    $settingq = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .

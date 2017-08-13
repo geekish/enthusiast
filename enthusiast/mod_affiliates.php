@@ -28,15 +28,15 @@ function get_affiliates( $listing = 'none', $start = 'none' ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = 'per_page'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -55,7 +55,7 @@ function get_affiliates( $listing = 'none', $start = 'none' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -71,9 +71,9 @@ function get_affiliates( $listing = 'none', $start = 'none' ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
       $afftable = $table . '_affiliates';
       $query = "SELECT * FROM `$afftable` ORDER BY `title`";
@@ -83,7 +83,7 @@ function get_affiliates( $listing = 'none', $start = 'none' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -98,9 +98,9 @@ function add_affiliate( $url, $title, $email, $listing = 'collective' ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = '';
    if( $listing == 'collective' || $listing == '' ) {
@@ -113,7 +113,7 @@ function add_affiliate( $url, $title, $email, $listing = 'collective' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -125,9 +125,9 @@ function add_affiliate( $url, $title, $email, $listing = 'collective' ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
       $afftable = $table . '_affiliates';
       $query = "INSERT INTO `$afftable` VALUES( " .
@@ -138,7 +138,7 @@ function add_affiliate( $url, $title, $email, $listing = 'collective' ) {
 
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -153,9 +153,9 @@ function edit_affiliate( $id, $listing = '', $image = '', $url = '',
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = '';
    if( $listing == '' || $listing == 'collective' ) {
@@ -178,7 +178,7 @@ function edit_affiliate( $id, $listing = '', $image = '', $url = '',
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -190,9 +190,9 @@ function edit_affiliate( $id, $listing = '', $image = '', $url = '',
       $dbpassword = $info['dbpassword'];
 
       $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
       $afftable = $table . '_affiliates';
       $query = "UPDATE `$afftable` SET ";
@@ -213,7 +213,7 @@ function edit_affiliate( $id, $listing = '', $image = '', $url = '',
 
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -225,9 +225,9 @@ function edit_affiliate( $id, $listing = '', $image = '', $url = '',
 function delete_affiliate( $id, $listing = '' ) {
    require 'config.php';
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = "DELETE FROM `$db_affiliates` WHERE `affiliateid` = '$id'";
    if( $listing != '' && $listing != 'collective' ){
@@ -236,7 +236,7 @@ function delete_affiliate( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -248,9 +248,9 @@ function delete_affiliate( $id, $listing = '' ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
       $afftable = $table . '_affiliates';
       $query = "DELETE FROM `$afftable` WHERE `affiliateid` = '$id'";
@@ -262,7 +262,7 @@ function delete_affiliate( $id, $listing = '' ) {
 
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -275,9 +275,9 @@ function get_affiliate_info( $id, $listing = 'collective' ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    $query = 'SELECT `url`, `title`, `imagefile`, `email` ' .
       "FROM `$db_affiliates` WHERE `affiliateid` = '$id'";
@@ -287,7 +287,7 @@ function get_affiliate_info( $id, $listing = 'collective' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -299,9 +299,9 @@ function get_affiliate_info( $id, $listing = 'collective' ) {
       $dbpassword = $info['dbpassword'];
 
       $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
       $afftable = $table . '_affiliates';
       $query = "SELECT `url`, `title`, `imagefile`, `email` FROM `$afftable`" .
@@ -313,7 +313,7 @@ function get_affiliate_info( $id, $listing = 'collective' ) {
 
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -326,9 +326,9 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get owner name
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
@@ -336,7 +336,7 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -348,7 +348,7 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -364,7 +364,7 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -377,7 +377,7 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -398,7 +398,7 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -415,15 +415,15 @@ function parse_affiliate_add_email( $id, $listing = '' ) {
       $email = $listinginfo['email'];
 
       $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $dbdatabase )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
       $query = "SELECT * FROM `$afftable` WHERE `affiliateid` = '$id'";
       $result = mysqli_query( $db_link_list, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link_list ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -469,9 +469,9 @@ function parse_affiliates_template( $id, $listing = '' ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get template
    $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
@@ -479,7 +479,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -495,7 +495,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -514,9 +514,9 @@ function parse_affiliates_template( $id, $listing = '' ) {
       if( $dbserver != $db_server || $dbdatabase != $db_database ||
          $dbuser != $db_user || $dbpassword != $db_password ) {
          $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
          mysqli_select_db( $dbdatabase )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
          $result = mysqli_query( $db_link_list, $query );
       } else {
@@ -525,7 +525,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
 
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -536,9 +536,9 @@ function parse_affiliates_template( $id, $listing = '' ) {
          $dbuser != $db_user || $dbpassword != $db_password ) {
          mysqli_close( $db_link_list );
          $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
          mysqli_select_db( $db_link, $db_database )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
       }
 
    } else {
@@ -546,7 +546,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -563,7 +563,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -589,7 +589,7 @@ function parse_affiliates_template( $id, $listing = '' ) {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }

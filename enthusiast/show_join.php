@@ -211,9 +211,9 @@ if( isset( $_POST['enth_join'] ) && $_POST['enth_join'] == 'yes' ) {
 
       $db_link = mysqli_connect( $info['dbserver'], $info['dbuser'],
          $info['dbpassword'] )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysql_select_db( $info['dbdatabase'], $db_link )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
       $result = mysql_query( $query, $db_link );
 
       // if addition is successful
@@ -305,7 +305,7 @@ if( isset( $_POST['enth_join'] ) && $_POST['enth_join'] == 'yes' ) {
       } else {
          if( mysql_errno() != 1062 ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link ) .
                '</i>; Query is: <code>' . $query . '</code>' );
 ?>
             <p<?php echo $errorstyle ?>>An error occured while attempting to add you to the pending

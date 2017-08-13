@@ -32,9 +32,9 @@ if( isset( $_POST['install'] ) && $_POST['install'] == 'yes' ) {
 
    // try to connect
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // create cats array
    $cats = array();

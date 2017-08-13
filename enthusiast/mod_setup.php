@@ -282,10 +282,10 @@ function do_step1() {
             '`added` date default NULL, ' .
             'PRIMARY KEY( email ), ' .
             'FULLTEXT( email, name, country, url ) ' .
-            ') TYPE=MyISAM;';
+            ') ENGINE=INNOdb DEFAULT CHARSET=utf8mb4 AUTO_INCREMENT=1;';
 
          $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+            or die( DATABASE_CONNECT_ERROR . mysqli_connect_error( ) );
          if( $db_link_list === false ) {
 ?>
             <p class="error">
@@ -294,8 +294,8 @@ function do_step1() {
 <?php
             return false;
          }
-         $db_selected = mysqli_select_db( $dbdatabase )
-            or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         $db_selected = mysqli_select_db( $db_link_list, $dbdatabase )
+            or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
          if( !$db_selected ) {
 ?>
             <p class="error">
@@ -307,18 +307,18 @@ function do_step1() {
          $result = mysqli_query( $db_link_list, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link_list ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             echo '<p class="error">Listing database creation failed.</p>';
             die( STANDARD_ERROR );
          }
-         mysql_close( $db_link_list );
+         mysqli_close( $db_link_list );
       }
 
       $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
       mysqli_select_db( $db_link, $db_database )
-         or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+         or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
       // setup temp database values
       $stat = '0';
@@ -353,7 +353,7 @@ function do_step1() {
       $result = mysqli_query( $db_link, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          echo '<p class="error">Listing database creation failed.</p>';
          die( STANDARD_ERROR );

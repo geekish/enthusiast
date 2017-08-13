@@ -28,16 +28,16 @@ function parse_email( $type, $listing, $email, $password = '' ) {
    require( 'config.php' );
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -54,7 +54,7 @@ function parse_email( $type, $listing, $email, $password = '' ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -63,16 +63,16 @@ function parse_email( $type, $listing, $email, $password = '' ) {
 
    // connect to listing database
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( 'Cannot connect: ' . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( 'Cannot connect: ' . mysqli_error() );
+      or die( 'Cannot connect: ' . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( 'Cannot connect: ' . mysqli_error( $db_link_list ) );
 
    // get member info
    $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -135,16 +135,16 @@ function get_members( $listing, $status = 'all', $sort = array(),
    require( 'config.php' );
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -179,9 +179,9 @@ function get_members( $listing, $status = 'all', $sort = array(),
 
    // connect to actual db
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // piece together the query
    $query = "SELECT * FROM `$table`";
@@ -200,10 +200,10 @@ function get_members( $listing, $status = 'all', $sort = array(),
    $query .= $limit_query;
 
    // get results
-   $result = mysqli_query( $db_link, $query );
+   $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -223,16 +223,16 @@ function delete_member( $id, $email ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -245,16 +245,16 @@ function delete_member( $id, $email ) {
 
    // connect to actual database
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // delete fan
    $query = "DELETE FROM `$table` WHERE `email` = '$email'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -270,16 +270,16 @@ function approve_member( $id, $email ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -291,9 +291,9 @@ function approve_member( $id, $email ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // approve member
    $query = "UPDATE `$table` SET `pending` = 0, `added` = CURDATE() WHERE " .
@@ -301,7 +301,7 @@ function approve_member( $id, $email ) {
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -317,16 +317,16 @@ function enqueue_member( $id, $email ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -338,16 +338,16 @@ function enqueue_member( $id, $email ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // approve member
    $query = "UPDATE `$table` SET `pending` = 1 WHERE `email` = '$email'";
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -363,16 +363,16 @@ function get_member_info( $listing, $email ) {
    require( 'config.php' );
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -384,16 +384,16 @@ function get_member_info( $listing, $email ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // get member info
    $query = "SELECT * FROM `$table` WHERE `email` = '$email'";
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -409,16 +409,16 @@ function get_member_info( $listing, $email ) {
 function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
    require 'config.php';
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$id'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -430,9 +430,9 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    foreach( $fields as $field => $value ) {
       $query = '';
@@ -495,7 +495,7 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
          $result = mysqli_query( $db_link_list, $query );
          if( !$result ) {
             log_error( __FILE__ . ':' . __LINE__,
-               'Error executing query: <i>' . mysqli_error() .
+               'Error executing query: <i>' . mysqli_error( $db_link_list ) .
                '</i>; Query is: <code>' . $query . '</code>' );
             die( STANDARD_ERROR );
          }
@@ -508,7 +508,7 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
       $result = mysqli_query( $db_link_list, $query );
       if( !$result ) {
          log_error( __FILE__ . ':' . __LINE__,
-            'Error executing query: <i>' . mysqli_error() .
+            'Error executing query: <i>' . mysqli_error( $db_link_list ) .
             '</i>; Query is: <code>' . $query . '</code>' );
          die( STANDARD_ERROR );
       }
@@ -519,7 +519,7 @@ function edit_member_info( $id, $email, $fields, $hold = 'no' ) {
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -537,16 +537,16 @@ function search_members( $search, $listing = '', $status = 'all',
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -555,9 +555,9 @@ function search_members( $search, $listing = '', $status = 'all',
    // connect to listing database
    $db_link_list = mysqli_connect( $info['dbserver'], $info['dbuser'],
       $info['dbpassword'] )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $info['dbdatabase'] )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // create query
    $query = 'SELECT * FROM `' . $info['dbtable'] . '` WHERE MATCH( ' .
@@ -580,7 +580,7 @@ function search_members( $search, $listing = '', $status = 'all',
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -602,16 +602,16 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get sortby
    $query = "SELECT `sort` FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -631,7 +631,7 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -643,9 +643,9 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // get sorters
    $query = "SELECT DISTINCT( `$sort` ) AS `sort` FROM `$table` WHERE " .
@@ -658,7 +658,7 @@ function get_member_sorter( $listing, $level = 1, $top = array() ) {
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -677,16 +677,16 @@ function check_member_password( $listing, $email, $attempt ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -698,16 +698,16 @@ function check_member_password( $listing, $email, $attempt ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    $query = "SELECT * FROM `$table` WHERE `email` = '$email' AND " .
       "`password` = MD5( '$attempt' )";
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -726,16 +726,16 @@ function reset_member_password( $listing, $email ) {
    require 'config.php';
 
    $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
    mysqli_select_db( $db_link, $db_database )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 
    // get info
    $query = "SELECT * FROM `$db_owned` WHERE `listingid` = '$listing'";
    $result = mysqli_query( $db_link, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }
@@ -747,9 +747,9 @@ function reset_member_password( $listing, $email ) {
    $dbpassword = $info['dbpassword'];
 
    $db_link_list = mysqli_connect( $dbserver, $dbuser, $dbpassword )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
-   mysqli_select_db( $dbdatabase )
-      or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+      or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
+   mysqli_select_db( $db_link_list, $dbdatabase )
+      or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link_list ) );
 
    // create random password
    $password = '';
@@ -765,7 +765,7 @@ function reset_member_password( $listing, $email ) {
    $result = mysqli_query( $db_link_list, $query );
    if( !$result ) {
       log_error( __FILE__ . ':' . __LINE__,
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link_list ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    }

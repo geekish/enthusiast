@@ -49,18 +49,18 @@ if( !defined( 'STANDARD_ERROR' ) )
 $query = "SELECT `value` FROM `$db_settings` WHERE `setting` = " .
    '"installation_path"';
 $db_link = mysqli_connect( $db_server, $db_user, $db_password )
-   or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   or die( DATABASE_CONNECT_ERROR . mysqli_connect_error() );
 mysqli_select_db( $db_link, $db_database )
-   or die( DATABASE_CONNECT_ERROR . mysqli_error() );
+   or die( DATABASE_CONNECT_ERROR . mysqli_error( $db_link ) );
 $result = mysqli_query( $db_link, $query );
 if( !$result ) {
    if( function_exists( 'log_error' ) ) {
       log_error( 'config.php',
-         'Error executing query: <i>' . mysqli_error() .
+         'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
       die( STANDARD_ERROR );
    } else {
-      die( 'Error executing query: <i>' . mysqli_error() .
+      die( 'Error executing query: <i>' . mysqli_error( $db_link ) .
          '</i>; Query is: <code>' . $query . '</code>' );
    }
 }
